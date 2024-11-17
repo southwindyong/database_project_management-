@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑用户信息 - 项目管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 让Flash消息在五秒内自动消失 */
+        .flash-message {
+            animation: fadeOut 5s forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">编辑用户信息</h1>
+
+        <!-- 显示Flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div class="alert alert-success flash-message">
+                    <ul class="mb-0">
+                        {% for category, message in messages %}
+                            <li class="{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-3">
+                <label for="first_name" class="form-label">名字：</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="last_name" class="form-label">姓氏：</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">邮箱：</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="role" class="form-label">角色：</label>
+                <select id="role" name="role" class="form-select" required>
+                    <option value="普通用户" {% if user.role == '普通用户' %}selected{% endif %}>普通用户</option>
+                    <option value="管理员" {% if user.role == '管理员' %}selected{% endif %}>管理员</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">状态：</label>
+                <select id="status" name="status" class="form-select" required>
+                    <option value="激活" {% if user.status == '激活' %}selected{% endif %}>激活</option>
+                    <option value="待审核" {% if user.status == '待审核' %}selected{% endif %}>待审核</option>
+                    <option value="禁用" {% if user.status == '禁用' %}selected{% endif %}>禁用</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">保存更改</button>
+        </form>
+
+        <hr class="my-4">
+        <p><a href="{{ url_for('main.manage_users') }}" class="btn btn-secondary">返回用户管理</a></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

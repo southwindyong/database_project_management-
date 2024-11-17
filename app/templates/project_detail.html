@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目详情</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script> <!-- 加入jQuery -->
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">项目详情</h1>
+
+        <!-- Flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-messages" class="alert alert-info alert-dismissible fade show" role="alert">
+                    {% for category, message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                <script>
+                    setTimeout(function() {
+                        document.getElementById('flash-messages').classList.remove('show');
+                    }, 5000);
+                </script>
+            {% endif %}
+        {% endwith %}
+
+        {% if project.is_public or is_member or session['role'] == '管理员' %}
+        <!-- 显示项目详情 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ project.project_name }}</h5>
+                <p class="card-text">{{ project.description }}</p>
+                <p><strong>开始日期：</strong>{{ project.start_date }}</p>
+                <p><strong>结束日期：</strong>{{ project.end_date }}</p>
+                <p><strong>状态：</strong>{{ project.status }}</p>
+                <p><strong>优先级：</strong>{{ project.priority }}</p>
+                <p><strong>预算：</strong>¥{{ project.budget }}</p>
+                <p><strong>创建时间：</strong>{{ project.created_at }}</p>
+                <p><strong>更新时间：</strong>{{ project.updated_at }}</p>
+            </div>
+        </div>
+
+        <!-- 编辑项目按钮 -->
+        {% if is_member or session['role'] == '管理员' %}
+            <a href="{{ url_for('main.edit_project', project_id=project.project_id) }}" class="btn btn-primary mb-3">编辑项目</a>
+        {% endif %}
+
+        <!-- 提交审批请求按钮（仅成员和管理员可以看到） -->
+        {% if is_member or session['role'] == '管理员' %}
+            <a href="{{ url_for('main.request_approval', project_id=project.project_id) }}" class="btn btn-warning mb-3">提交审批请求</a>
+        {% endif %}
+
+        <!-- 跳转到项目成员管理页面按钮（仅管理员或项目负责人可以看到） -->
+        {% if session['role'] == '管理员' or is_project_leader %}
+            <a href="{{ url_for('main.project_members_detail', project_id=project.project_id) }}" class="btn btn-info mb-3">查看/管理项目成员</a>
+        {% endif %}
+
+        <!-- 显示用户提交的审批事项 -->
+        <h3 class="my-4">我提交的审批事项</h3>
+        <ul class="list-group mb-4">
+            {% if submitted_approvals %}
+                {% for approval in submitted_approvals %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('main.approval_detail', approval_id=approval.approval_id) }}">
+                            {{ approval.request_type }} - 状态: {{ approval.status }}
+                        </a>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">暂无提交的审批事项。</li>
+            {% endif %}
+        </ul>
+
+        <!-- 显示用户待审批的事项 -->
+        <h3 class="my-4">待我审批的事项</h3>
+        <ul class="list-group mb-4">
+            {% if pending_approvals %}
+                {% for approval in pending_approvals %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('main.approval_detail', approval_id=approval.approval_id) }}">
+                            {{ approval.request_type }}
+                        </a>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">暂无待审批的事项。</li>
+            {% endif %}
+        </ul>
+
+        <!-- 显示项目成员 -->
+        <h3 class="my-4">项目成员</h3>
+        <ul class="list-group mb-4">
+            {% for member in project_members %}
+                <li class="list-group-item">
+                    <a href="javascript:void(0);" class="toggle-details" data-target="#member-{{ member.member_id }}">
+                        {{ member.user.username }} - {{ member.role }}
+                    </a>
+                    <div id="member-{{ member.member_id }}" class="member-details collapse">
+                        <p><strong>用户名：</strong>{{ member.user.username }}</p>
+                        <p><strong>邮箱：</strong>{{ member.user.email }}</p>
+                        <p><strong>角色：</strong>{{ member.role }}</p>
+                    </div>
+
+                    {% if session['role'] == '管理员' %}
+                        <!-- 管理员可以编辑和移除成员 -->
+                        <a href="{{ url_for('main.edit_project_member', project_id=project.project_id, member_id=member.member_id) }}" class="btn btn-sm btn-info">编辑</a>
+                        <form action="{{ url_for('main.remove_project_member', project_id=project.project_id, member_id=member.member_id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('确定要移除该成员吗？')">移除</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- 添加项目成员（管理员或项目负责人） -->
+        {% if session['role'] == '管理员' or is_project_leader %}
+            <h4>添加项目成员</h4>
+            <form action="{{ url_for('main.project_detail', project_id=project.project_id) }}" method="POST" class="mb-4">
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">选择用户:</label>
+                    <select class="form-control" id="user_id" name="user_id" required>
+                        {% for user in available_users %}
+                            <option value="{{ user.user_id }}">{{ user.username }} ({{ user.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">角色:</label>
+                    <select class="form-control" id="role" name="role">
+                        <option value="成员">成员</option>
+                        <option value="项目负责人">项目负责人</option>
+                        <option value="观察员">观察员</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">添加成员</button>
+            </form>
+        {% endif %}
+
+        <!-- 显示历史审批事项（项目负责人或管理员可以查看） -->
+        {% if is_project_leader or session['role'] == '管理员' %}
+            <h3 class="my-4">历史审批事项</h3>
+            <ul class="list-group mb-4">
+                {% if approvals %}
+                    {% for approval in approvals %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('main.approval_history', approval_id=approval.approval_id) }}">
+                                {{ approval.request_type }} - 状态: {{ approval.status }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="list-group-item">暂无历史审批事项。</li>
+                {% endif %}
+            </ul>
+        {% endif %}
+
+        <hr>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">返回首页</a>
+
+        {% else %}
+        <!-- 如果没有权限查看项目 -->
+        <div class="alert alert-danger" role="alert">
+            您没有权限查看此项目的详情。
+        </div>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">返回首页</a>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        // 点击成员展开或折叠详细信息
+        $(document).ready(function() {
+            $('.toggle-details').click(function() {
+                var target = $(this).data('target');
+                $(target).collapse('toggle');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* Flash 消息样式 */
+#flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    z-index: 9999;
+}
+
+.flash-message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: white;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+.flash-message.success {
+    background-color: #4CAF50;
+}
+
+.flash-message.error {
+    background-color: #f44336;
+}
+
+.flash-message.info {
+    background-color: #2196F3;
+}
+
+.flash-message.warning {
+    background-color: #ff9800;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* 页面布局 */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+nav {
+    margin-top: 10px;
+}
+
+nav a {
+    margin: 0 10px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin: 10px 0;
+}
+
+.project-list a, .message-list a, .notification-list a, .approval-list a {
+    color: #333;
+    text-decoration: none;
+}
+
+.project-list a:hover, .message-list a:hover, .notification-list a:hover, .approval-list a:hover {
+    color: #007bff;
+}
+
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.notification-item.read {
+    background-color: #f9f9f9;
+}
+
+.notification-item.unread {
+    background-color: #f1f1f1;
+}
+
+.read-label {
+    color: #4CAF50;
+}
+
+.unread-label {
+    color: #f44336;
+}
