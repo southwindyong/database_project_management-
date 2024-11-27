@@ -42,12 +42,12 @@
                         <strong>状态:</strong> {{ approval.status }}<br>
 
                         <!-- 如果审批状态是待审批，显示批准和拒绝按钮 -->
-                        {% if approval.status == '待审批' %}
+                        <!-- {% if approval.status == '待审批' %}
                             <form action="{{ url_for('main.process_approval', approval_id=approval.approval_id) }}" method="POST" class="mt-2">
                                 <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">批准</button>
                                 <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">拒绝</button>
                             </form>
-                        {% endif %}
+                        {% endif %} -->
 
                         <!-- 查看审批详情按钮 -->
                         <a href="{{ url_for('main.approval_detail', approval_id=approval.approval_id) }}" class="btn btn-primary btn-sm mt-2">查看详情</a>

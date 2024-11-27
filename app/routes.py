@@ -506,14 +506,14 @@ def edit_project_member(project_id, member_id):
             project_id
         )
 
-        # 如果角色变动涉及管理员或负责人，需要发送通知给其他相关成员
-        if old_role != new_role:
-            send_notification(
-                project_id, 
-                f"项目成员 {member.user_id} 的角色已变更为 {new_role}。",
-                "项目信息变动",
-                project_id
-            )
+        # # 如果角色变动涉及管理员或负责人，需要发送通知给其他相关成员
+        # if old_role != new_role:
+        #     send_notification(
+        #         project_id, 
+        #         f"项目成员 {member.user_id} 的角色已变更为 {new_role}。",
+        #         "项目信息变动",
+        #         project_id
+        #     )
 
         flash("项目成员角色更新成功", "success")
         return redirect(url_for('main.project_members_detail', project_id=project_id))
